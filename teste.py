@@ -60,8 +60,8 @@ y_train = pd.get_dummies(y_train, prefix='target').reset_index(drop=True)
 y_valid = pd.get_dummies(y_valid, prefix='target').reset_index(drop=True)
 y_test = pd.get_dummies(y_test, prefix='target').reset_index(drop=True)
 
-model = MinhaNovaRede(input_features, 100, 50)
-criterion = nn.CrossEntropyLoss()
+model = MinhaNovaRede(input_features)
+criterion = nn.BCEWithLogitsLoss()
 optimizer = optim.SGD(model.parameters(), lr=0.01)
 
 print(model)
@@ -71,15 +71,15 @@ batch_size = 25
 early_stopping_epochs = 50 # quantas épocas sem melhoria serão toleradas antes de parar o treinamento
 
 t = Treinamento()
-model, train_loss, valid_loss = t.train(model, 
-                                        epochs, 
-                                        batch_size, 
-                                        early_stopping_epochs, 
-                                        optimizer, 
-                                        criterion, 
-                                        torch.from_numpy(X_train), 
-                                        torch.from_numpy(y_train.to_numpy()), 
-                                        torch.from_numpy(X_valid), 
+model, train_loss, valid_loss = t.train(model,
+                                        epochs,
+                                        batch_size,
+                                        early_stopping_epochs,
+                                        optimizer,
+                                        criterion,
+                                        torch.from_numpy(X_train),
+                                        torch.from_numpy(y_train.to_numpy()),
+                                        torch.from_numpy(X_valid),
                                         torch.from_numpy(y_valid.to_numpy()))
 
 p = Plots()
