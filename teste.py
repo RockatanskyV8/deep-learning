@@ -61,7 +61,7 @@ y_valid = pd.get_dummies(y_valid, prefix='target').reset_index(drop=True)
 y_test = pd.get_dummies(y_test, prefix='target').reset_index(drop=True)
 
 model = MinhaNovaRede(input_features)
-criterion = nn.BCEWithLogitsLoss()
+criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(model.parameters(), lr=0.01)
 
 print(model)

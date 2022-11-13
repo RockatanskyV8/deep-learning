@@ -56,7 +56,7 @@ class MinhaNovaRede(nn.Module):
         self.camada_entrada = nn.Linear(input_features, 100)
         self.camada_oculta_1 = nn.Linear(100, 50)
         self.camada_oculta_2 = nn.Linear(50, 10)
-        self.camada_saida = nn.Linear(10, 1)
+        self.camada_saida = nn.Linear(10, 2)
 
         self.relu = nn.ReLU()
         self.softmax = nn.Softmax(dim=-1)
