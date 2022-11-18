@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
-import torch.optim as optim
+
+from datetime import datetime
 
 import random
 import pandas as pd
@@ -60,22 +61,28 @@ y_train = pd.get_dummies(y_train, prefix='target').reset_index(drop=True)
 y_valid = pd.get_dummies(y_valid, prefix='target').reset_index(drop=True)
 y_test = pd.get_dummies(y_test, prefix='target').reset_index(drop=True)
 
-model = MinhaNovaRede(input_features)
-criterion = nn.CrossEntropyLoss()
-optimizer = optim.SGD(model.parameters(), lr=0.01)
+model = MinhaNovaRede
+#  optimizer = optim.SGD(model.parameters(), lr=0.01)
 
-print(model)
+#  print(model)
+
+criterion = nn.CrossEntropyLoss()
 
 epochs = 2000
-batch_size = 25
-early_stopping_epochs = 50 # quantas épocas sem melhoria serão toleradas antes de parar o treinamento
+early_stopping_epochs = 20
+best_valid_loss = np.Inf
 
-r = Runner(model, epochs, batch_size, early_stopping_epochs)
-accuracy_final = r.classificacao(optimizer, criterion,
-                                 torch.from_numpy(X_train),
-                                 torch.from_numpy(y_train.to_numpy()),
-                                 torch.from_numpy(X_valid),
-                                 torch.from_numpy(y_valid.to_numpy()))
+learning_rates = [0.0001, 0.001, 0.01, 0.1]
+batch_sizes = [15, 30, 60, 120]
+# number_of_hidden_layers = []
+# neurons_in_hidden_layers = []
+
+
+r = Runner(model, epochs, 0, early_stopping_epochs, retries = 5, batches = batch_sizes)
+accuracy_final = r.regressao(input_features, learning_rates, criterion, 
+                             torch.from_numpy(X_train),
+                             torch.from_numpy(y_train.to_numpy()),
+                             torch.from_numpy(X_valid),
+                             torch.from_numpy(y_valid.to_numpy()))
 
 print(accuracy_final)
-
