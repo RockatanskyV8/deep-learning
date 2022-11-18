@@ -25,6 +25,23 @@ class Plots():
         plt.legend(loc='best')
         plt.show()
 
+    def plot_losses(self, train_loss, valid_loss):
+        figure(figsize=(12, 8))
+        
+        # Plot and label the training and validation loss values
+        epochs = len(train_loss)
+        plt.plot(range(1, epochs+1), train_loss, label='Training Loss')
+        plt.plot(range(1, epochs+1), valid_loss, label='Validation Loss')
+   
+        # Add in a title and axes labels
+        plt.title('Training and Validation Loss')
+        plt.xlabel('Epochs')
+        plt.ylabel('Loss')
+   
+        # Display the plot
+        plt.legend(loc='best')
+        plt.show()
+
     def get_accuracy(self, model, X_test, y_test):
         model.eval()
     
@@ -45,8 +62,9 @@ class Plots():
                 hits += 1
                 
         return hits/(index+1)
-
-    def accuracy_fn(y_true, y_pred):
-        correct = torch.eq(y_true, y_pred).sum().item() # torch.eq() calculates where two tensors are equal
-        acc = (correct / len(y_pred)) * 100 
-        return acc
+    
+    def get_loss(self, model, X_test, y_test, criterion):
+        model.eval()
+        predicted = model(X_test.float())
+        loss = criterion(predicted, y_test)
+        return loss.item()
