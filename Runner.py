@@ -1,3 +1,4 @@
+import torch
 import torch.optim as optim
 
 from Treinamento import Treinamento
