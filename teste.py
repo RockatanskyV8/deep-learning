@@ -11,54 +11,17 @@ from sklearn.preprocessing import StandardScaler
 
 from Runner import *
 from Modelos import *
+from Reader import *
 from Treinamento import Treinamento
 ################################################################################################
-
-random_seed = 42
-pd.set_option('display.max_columns', None)
-
-torch.manual_seed(random_seed)
-random.seed(random_seed)
-np.random.seed(random_seed)
-
+input_features = 3
 df = pd.read_csv('../df_points.txt', sep='\t', index_col=[0])
 
-train_p = 0.7
-val_p = 0.15
-test_p = 0.15
+r = Reader(df)
+train, valid = r.read()
 
-train_size = int(train_p*df.shape[0])
-val_size = int(val_p*df.shape[0])
-test_size = int(test_p*df.shape[0])
-
-X_train, X_test, y_train, y_test = train_test_split(df[['x', 'y', 'z']],
-                                                    df['label'],
-                                                    train_size=train_size,
-                                                    stratify=df['label'],
-                                                    random_state=42)
-
-X_valid, X_test, y_valid, y_test = train_test_split(X_test,
-                                                    y_test,
-                                                    test_size=test_size,
-                                                    stratify=y_test,
-                                                    random_state=42)
-
-X_train.reset_index(drop=True, inplace=True)
-X_valid.reset_index(drop=True, inplace=True)
-X_test.reset_index(drop=True, inplace=True)
-
-
-input_features = 3
-ss = StandardScaler()
-ss.fit(X_train)
-
-X_train = ss.transform(X_train)
-X_valid = ss.transform(X_valid)
-X_test = ss.transform(X_test)
-
-y_train = pd.get_dummies(y_train, prefix='target').reset_index(drop=True)
-y_valid = pd.get_dummies(y_valid, prefix='target').reset_index(drop=True)
-y_test = pd.get_dummies(y_test, prefix='target').reset_index(drop=True)
+X_train, X_test, y_train, y_test = train
+X_valid, X_test, y_valid, y_test = valid
 
 model = MinhaNovaRede(input_features)
 criterion = nn.CrossEntropyLoss()
