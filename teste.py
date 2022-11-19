@@ -34,11 +34,11 @@ batch_size = 25
 early_stopping_epochs = 50 # quantas épocas sem melhoria serão toleradas antes de parar o treinamento
 
 r = Runner(model, epochs, batch_size, early_stopping_epochs)
-model = r.classificacao(optimizer, criterion,
-                        torch.from_numpy(X_train),
-                        torch.from_numpy(y_train.to_numpy()),
-                        torch.from_numpy(X_valid),
-                        torch.from_numpy(y_valid.to_numpy()))
+model, train_loss, valid_loss = r.classificacao(optimizer, criterion,
+                                                torch.from_numpy(X_train),
+                                                torch.from_numpy(y_train.to_numpy()),
+                                                torch.from_numpy(X_valid),
+                                                torch.from_numpy(y_valid.to_numpy()))
 
 p = Plots()
 accuracy_final = p.get_accuracy(model, torch.from_numpy(X_test), torch.from_numpy(y_test.to_numpy()))
