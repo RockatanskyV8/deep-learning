@@ -79,10 +79,15 @@ batch_sizes = [15, 30, 60, 120]
 
 
 r = Runner(model, epochs, 0, early_stopping_epochs, retries = 5, batches = batch_sizes)
-accuracy_final = r.regressao(input_features, learning_rates, criterion, 
-                             torch.from_numpy(X_train),
-                             torch.from_numpy(y_train.to_numpy()),
-                             torch.from_numpy(X_valid),
-                             torch.from_numpy(y_valid.to_numpy()))
+current_valid_loss = r.regressao(input_features, learning_rates, criterion, 
+                                 torch.from_numpy(X_train),
+                                 torch.from_numpy(y_train.to_numpy()),
+                                 torch.from_numpy(X_valid),
+                                 torch.from_numpy(y_valid.to_numpy()))
 
+p = Plots()
+accuracy_final = p.get_loss(model,
+           torch.from_numpy(X_test.to_numpy()),
+           torch.from_numpy(y_test),
+           criterion)
 print(accuracy_final)

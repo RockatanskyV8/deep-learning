@@ -65,11 +65,5 @@ class Runner():
 
                     print(f'\nValidation loss: {current_valid_loss}\n')
 
-            p = Plots()
-            p.get_loss(model,
-                       torch.from_numpy(X_test.to_numpy()),
-                       torch.from_numpy(y_test),
-                       criterion)
-
             return current_valid_loss
 
