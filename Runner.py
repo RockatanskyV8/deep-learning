@@ -1,6 +1,7 @@
 import torch
 import torch.optim as optim
 
+import numpy as np
 from Treinamento import Treinamento
 from Plots import Plots
 
@@ -36,6 +37,7 @@ class Runner():
     def regressao(self, input_features, learning_rates, criterion, X_train, y_train, X_valid, y_valid):
         current_valid_loss = 0
         t = Treinamento()
+        best_valid_loss = np.Inf
         for initializations in range(0, self.retries):
             for lr in learning_rates:
                 for batch_size in self.batches:
