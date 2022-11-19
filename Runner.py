@@ -30,7 +30,7 @@ class Runner():
         p = Plots()
         p.plot_losses(train_loss, valid_loss)
 
-        return p.get_accuracy(model, torch.from_numpy(X_test), torch.from_numpy(y_test.to_numpy()))
+        return model
 
 
     def regressao(self, input_features, learning_rates, criterion, X_train, y_train, X_valid, y_valid):
