@@ -5,11 +5,11 @@ import numpy as np
 from Treinamento import Treinamento
 
 class Runner():
-    def __init__(self, model, epochs, batch_size, early_stopping_epochs, retries = 5, batches = []):
+    def __init__(self, model, epochs = 2000, batch_size = 25, early_stopping_epochs = 60, retries = 5, batches = []):
         self.model                 = model
         self.epochs                = epochs
-        self.batch_size            = batch_size
         self.early_stopping_epochs = early_stopping_epochs # quantas épocas sem melhoria serão toleradas antes de parar o treinamento
+        self.batch_size            = batch_size
         self.retries               = retries
         self.batches               = batches
 
