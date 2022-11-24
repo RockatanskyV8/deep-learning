@@ -3,8 +3,9 @@ import torch.optim as optim
 
 import numpy as np
 from Treinamento import Treinamento
+from Modelos import *
 
-class Runner():
+class Classificador():
     def __init__(self, model, epochs = 2000, batch_size = 25, early_stopping_epochs = 60, retries = 5, batches = []):
         self.model                 = model
         self.epochs                = epochs
@@ -30,17 +31,24 @@ class Runner():
         return model, train_loss, valid_loss
 
 
-    def regressao(self, input_features, learning_rates, criterion, X_train, y_train, X_valid, y_valid):
+class Regressor():
+    def __init__(self, epochs = 2000, batch_sizes = [], early_stopping_epochs = 60, retries = 5):
+        self.epochs                = epochs
+        self.early_stopping_epochs = early_stopping_epochs # quantas épocas sem melhoria serão toleradas antes de parar o treinamento
+        self.batch_sizes           = batch_sizes
+        self.retries               = retries
+
+    def regressao(self, input_features, layers, learning_rates, criterion, X_train, y_train, X_valid, y_valid):
         current_valid_loss = 0
         t = Treinamento()
         best_valid_loss = np.Inf
         for initializations in range(0, self.retries):
             for lr in learning_rates:
-                for batch_size in self.batches:
+                for batch_size in self.batch_sizes:
 
                     print(f'----------\nLearning rate: {lr}\nBatch size: {batch_size}\n')
 
-                    model = self.model(input_features)
+                    model = GeradorRede(input_features, layers)
                     optimizer = optim.SGD(model.parameters(), lr=lr)
 
                     model, train_loss, valid_loss = t.train(model,

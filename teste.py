@@ -9,7 +9,7 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
-from Runner import *
+from Runner import Classificador
 from Modelos import *
 from Reader import *
 from Treinamento import Treinamento
@@ -35,7 +35,7 @@ camada3 = Camada(2, softmax)
 model = GeradorRede( input_features , [Camada(500, nn.ReLU(), nn.Dropout(p) ),
                                        Camada(250, nn.ReLU(), nn.Dropout(p) ),
                                        Camada(100, nn.ReLU(), nn.Dropout(p) ),
-                                       Camada( 10, nn.ReLU(), nn.Dropout(p) ),
+                                       Camada( 10, nn.ReLU()),
                                        Camada(  2, softmax ),
                                        ])
 #  model = MinhaNovaRede(input_features)
@@ -48,7 +48,7 @@ epochs = 2000
 batch_size = 25
 early_stopping_epochs = 50 # quantas épocas sem melhoria serão toleradas antes de parar o treinamento
 
-r = Runner(model, epochs, batch_size, early_stopping_epochs)
+r = Classificador(model, epochs, batch_size, early_stopping_epochs)
 model, train_loss, valid_loss = r.classificacao(optimizer, criterion,
                                                 torch.from_numpy(X_train),
                                                 torch.from_numpy(y_train.to_numpy()),
@@ -70,3 +70,18 @@ print(accuracy_final)
 #  (dropout_2): Dropout(p=0.25, inplace=False)
 #  (dropout_3): Dropout(p=0.375, inplace=False)
 
+#  s = self.relu(self.camada_entrada(p))
+#  s = self.dropout_1(s) # <= aplicamos a camada de dropout, que só faz efeito quando o modelo está em modo de treinamento
+#  s = self.relu(self.camada_oculta_1(s))
+#  s = self.dropout_2(s) # <= aplicamos a camada de dropout, que só faz efeito quando o modelo está em modo de treinamento
+#  s = self.relu(self.camada_oculta_2(s))
+#  s = self.dropout_3(s)
+#  s = self.relu(self.camada_oculta_3(s))
+#  s = self.softmax(self.camada_saida(s))
+
+#  s = F.relu(self.camada_entrada(p))
+#  s = self.dropout_1(s) # <= aplicamos a camada de dropout, que só faz efeito quando o modelo está em modo de treinamento
+#  s = F.relu(self.camada_oculta_1(s))
+#  s = self.dropout_2(s) # <= aplicamos a camada de dropout, que só faz efeito quando o modelo está em modo de treinamento
+#  s = F.relu(self.camada_oculta_2(s))
+#  s = self.camada_saida(s)
