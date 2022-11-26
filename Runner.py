@@ -42,6 +42,7 @@ class Regressor():
         current_valid_loss = 0
         t = Treinamento()
         best_valid_loss = np.Inf
+        train_loss, valid_loss = [], []
         for initializations in range(0, self.retries):
             for lr in learning_rates:
                 for batch_size in self.batch_sizes:
@@ -71,5 +72,5 @@ class Regressor():
 
                     print(f'\nValidation loss: {current_valid_loss}\n')
 
-            return current_valid_loss
+            return current_valid_loss, train_loss, valid_loss
 
