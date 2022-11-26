@@ -74,7 +74,7 @@ class Regressor():
                         print('New best global model found!')
 
                     print(f'\nValidation loss: {current_valid_loss}\n')
-                    print(f'Accuracy: {current_valid_loss}\n')
+                    print(f'Accuracy: {accuracy}\n')
 
             return current_valid_loss, train_loss, valid_loss
 
