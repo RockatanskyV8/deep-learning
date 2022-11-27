@@ -39,7 +39,7 @@ class Regressor():
         self.batch_sizes           = batch_sizes
         self.retries               = retries
 
-    def regressao(self, input_features, layers, learning_rates, criterion, X_train, y_train, X_valid, y_valid, X_test, y_test):
+    def regressao(self, input_features, layers, learning_rates, criterion, X_train, y_train, X_valid, y_valid):
         current_valid_loss = 0
         t = Treinamento()
         best_valid_loss = np.Inf
@@ -66,15 +66,12 @@ class Regressor():
 
                     # store best valid loss
                     current_valid_loss = min(valid_loss)
-                    p = Plots()
-                    accuracy = p.get_accuracy(model, X_test, y_test )
                     if current_valid_loss < best_valid_loss:
                         torch.save(model.state_dict(), 'best_global_model')
                         best_valid_loss = current_valid_loss
                         print('New best global model found!')
 
                     print(f'\nValidation loss: {current_valid_loss}\n')
-                    print(f'Accuracy: {accuracy}\n')
 
             return current_valid_loss, train_loss, valid_loss
 
