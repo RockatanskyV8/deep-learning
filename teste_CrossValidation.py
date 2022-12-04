@@ -116,11 +116,13 @@ class Treinamento():
                     break
 
                 model.train()
-                acc_train_loss = self.cross_train(X_cros_train, y_cros_train, model, optimizer, criterion, batch_size)
+                acc_train_loss = self.cross_train(torch.from_numpy(X_cros_train), torch.from_numpy(y_cros_train.to_numpy()), 
+                                                  model, optimizer, criterion, batch_size)
                 train_loss.append(acc_train_loss)
 
                 model.eval()
-                acc_valid_loss = self.cross_valid(X_cros_valid, y_cros_valid, model, criterion, batch_size)
+                acc_valid_loss = self.cross_valid(torch.from_numpy(X_cros_valid), torch.from_numpy(y_cros_valid.to_numpy()), 
+                                                  model, criterion, batch_size)
                 valid_loss.append(acc_valid_loss)
 
                 if acc_valid_loss < best_valid_loss:
