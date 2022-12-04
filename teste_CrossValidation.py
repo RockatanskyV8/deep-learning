@@ -1,206 +1,151 @@
-########### my imports
 import torch
-import torch.nn as nn
-import torch.optim as optim
-
-import random
-import pandas as pd
 import numpy as np
+from tqdm import tqdm
+from datetime import datetime
 
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
+from torch.utils.data import SubsetRandomSampler, DataLoader
 
-from Modelos import *
-from Treinamento import Treinamento
-from Plots import Plots
-################################################################################################
-# other imports
-import os
-import torch
-from torch import nn
-from torchvision.datasets import MNIST
-from torch.utils.data import DataLoader, ConcatDataset
-from torchvision import transforms
+from sklearn.model_selection import cross_validate
+from sklearn.model_selection import GroupKFold
 from sklearn.model_selection import KFold
-################################################################################################
 
-from torch.utils.data import Dataset
-
-def reset_weights(m):
-  # Try resetting model weights to avoid weight leakage.
-  for layer in m.children():
-   if hasattr(layer, 'reset_parameters'):
-    print(f'Reset trainable parameters of layer = {layer}')
-    layer.reset_parameters()
-
-#  if __name__ == '__main__':
-
-random_seed = 42
-pd.set_option('display.max_columns', None)
-
-torch.manual_seed(random_seed)
-random.seed(random_seed)
-np.random.seed(random_seed)
-
-df = pd.read_csv('../df_points.txt', sep='\t', index_col=[0])
-
-train_p = 0.7
-val_p = 0.15
-test_p = 0.15
-
-train_size = int(train_p*df.shape[0])
-val_size = int(val_p*df.shape[0])
-test_size = int(test_p*df.shape[0])
-
-X_train, X_test, y_train, y_test = train_test_split(df[['x', 'y', 'z']],
-                                                    df['label'],
-                                                    train_size=train_size,
-                                                    stratify=df['label'],
-                                                    random_state=42)
-
-X_valid, X_test, y_valid, y_test = train_test_split(X_test,
-                                                    y_test,
-                                                    test_size=test_size,
-                                                    stratify=y_test,
-                                                    random_state=42)
+from Reader import *
 
 
-input_features = 3
-ss = StandardScaler()
-ss.fit(X_train)
-
-X_train = ss.transform(X_train)
-X_valid = ss.transform(X_valid)
-X_test = ss.transform(X_test)
-
-y_train = pd.get_dummies(y_train, prefix='target').reset_index(drop=True)
-y_valid = pd.get_dummies(y_valid, prefix='target').reset_index(drop=True)
-y_test = pd.get_dummies(y_test, prefix='target').reset_index(drop=True)
-
-num_epochs = 2000
-batch_size = 25
-early_stopping_epochs = 50 # quantas épocas sem melhoria serão toleradas antes de parar o treinamento
-
-X_train = torch.from_numpy(X_train),
-y_train = torch.from_numpy(y_train.to_numpy())
-X_valid = torch.from_numpy(X_valid),
-y_valid = torch.from_numpy(y_valid.to_numpy())
-
-def get_batches(data, batch_size=1):
-    batches = []
-    
-    data_size = len(data)
-    for start_idx in range(0, data_size, batch_size):
-        end_idx = min(data_size, start_idx + batch_size)
-        batches.append(data[start_idx:end_idx])
-    
-    return batches
-
-
-
-
-
-for index, (original_data, original_target) in enumerate(zip(get_batches(X_train, batch_size),
-                                                             get_batches(y_train, batch_size))):
-    # Format data to tensor
-    #  target = (original_target == 1).nonzero(as_tuple=True)[1]
-    #  data = original_data #.float() # Esse '.float()' é necessário para arrumar o tipo do dado
-    #  network.apply(reset_weights)
-    
-    # Sample elements randomly from a given list of ids, no replacement.
-    train_subsampler = torch.utils.data.SubsetRandomSampler(original_data)
-    test_subsampler  = torch.utils.data.SubsetRandomSampler(original_target)
-
-    trainloader = torch.utils.data.DataLoader(
-                      df, 
-                      batch_size=10, sampler=train_subsampler)
-    testloader = torch.utils.data.DataLoader(
-                      df,
-                      batch_size=10, sampler=test_subsampler)
-
-
-    network = MinhaNovaRede()
-    network.apply(reset_weights)
-    
-    optimizer = torch.optim.Adam(network.parameters(), lr=1e-4)
-
-
-    for epoch in range(0, num_epochs):
-        # Print epoch
-        print(f'Starting epoch {epoch+1}')
-
-        # Set current loss value
-        current_loss = 0.0
-        for i, data in enumerate(trainloader, 0):
-            # Get inputs
-            inputs, targets = data
-            
-            # Zero the gradients
-            optimizer.zero_grad()
-            
-            # Perform forward pass
-            outputs = network(inputs)
-            
-            # Compute loss
-            loss = loss_function(outputs, targets)
-            
-            # Perform backward pass
-            loss.backward()
-            
-            # Perform optimization
-            optimizer.step()
-            
-            # Print statistics
-            current_loss += loss.item()
-
-            # Print statistics
-            current_loss += loss.item()
-            if i % 500 == 499:
-                print('Loss after mini-batch %5d: %.3f' %
-                      (i + 1, current_loss / 500))
-                current_loss = 0.0
-
-    # Process is complete.
-    print('Training process has finished. Saving trained model.')
-
-    # Print about testing
-    print('Starting testing')
-    
-    # Saving the model
-    save_path = f'./model-fold-{fold}.pth'
-    torch.save(network.state_dict(), save_path)
-
-    # Evaluationfor this fold
-    correct, total = 0, 0
-    with torch.no_grad():
+class Treinamento():
+    def get_batches(self, data, batch_size=1):
+        batches = []
         
-      # Iterate over the test data and generate predictions
-      for i, data in enumerate(testloader, 0):
-          print(i)
-
-#          # Get inputs
-#          inputs, targets = data
-#
-#          # Generate outputs
-#          outputs = network(inputs)
-#
-#          # Set total and correct
-#          _, predicted = torch.max(outputs.data, 1)
-#          total += targets.size(0)
-#          correct += (predicted == targets).sum().item()
-#
-#        # Print accuracy
-#        print('Accuracy for fold %d: %d %%' % (fold, 100.0 * correct / total))
-#        print('--------------------------------')
-#        results[fold] = 100.0 * (correct / total)
-#
-#  # Print fold results
-#  print(f'K-FOLD CROSS VALIDATION RESULTS FOR {k_folds} FOLDS')
-#  print('--------------------------------')
-#  sum = 0.0
-#  for key, value in results.items():
-#    print(f'Fold {key}: {value} %')
-#    sum += value
-#  print(f'Average: {sum/len(results.items())} %')
+        data_size = len(data)
+        for start_idx in range(0, data_size, batch_size):
+            end_idx = min(data_size, start_idx + batch_size)
+            batches.append(data[start_idx:end_idx])
         
+        return batches
+
+    def reset_weights(m):
+        # Try resetting model weights to avoid weight leakage.
+        for layer in m.children():
+         if hasattr(layer, 'reset_parameters'):
+          print(f'Reset trainable parameters of layer = {layer}')
+          layer.reset_parameters()
+
+    def cross_train(self, X_train, y_train, model, optimizer, criterion, batch_size = 1):
+        acc_train_loss = 0.0
+
+        for index, (original_data, original_target) in enumerate(zip(self.get_batches(X_train, batch_size),
+                                                                     self.get_batches(y_train, batch_size))):
+                
+                print(original_target)
+                print((original_target == 1))
+                print()
+                # Format data to tensor
+                target = (original_target == 1).nonzero(as_tuple=True)[1]
+                data = original_data.float() # Esse '.float()' é necessário para arrumar o tipo do dado
+
+                # target = target.cuda()
+                # data = data.cuda()
+
+                optimizer.zero_grad()
+
+                # model.forward(data)
+                predicted = model(data)
+
+                loss = criterion(predicted, target)
+
+                # Backprop
+                loss.backward()
+                optimizer.step()
+
+                acc_train_loss += loss.item()
+
+        return acc_train_loss
+
+    def cross_valid(self, X_valid, y_valid, model, criterion, batch_size = 1):
+        acc_valid_loss = 0.0
+
+        for index, (original_data, original_target) in enumerate(zip(self.get_batches(X_valid, batch_size), 
+                                                                     self.get_batches(y_valid, batch_size))):
+            # Format data to tensor
+            target = (original_target == 1).nonzero(as_tuple=True)[1]
+            data = original_data.float() # Esse '.float()' é necessário para arrumar o tipo do dado
     
+            # target = target.cuda()
+            # data = data.cuda()
+    
+            # model.forward(data)
+            predicted = model(data)
+    
+            loss = criterion(predicted, target)
+            acc_valid_loss += loss.item()
+    
+        return acc_valid_loss
+
+    def train(self, model, n_epochs, batch_size, early_stopping_epochs, optimizer, criterion, dataset):
+        init = datetime.now()
+        
+        best_epoch = None
+        best_valid_loss = np.Inf
+        best_train_loss = None
+        epochs_without_improv = 0
+
+        train_loss = []
+        valid_loss = []
+
+        read = Reader(dataset)
+        train, valid = read.read()
+
+        X_train, X_test, y_train, y_test = train
+        X_valid, X_test, y_valid, y_test = valid
+
+        df = zip(self.get_batches(X_train, batch_size),
+                 self.get_batches(y_train, batch_size))
+
+        kf = KFold(n_splits=4, random_state=1, shuffle=True)
+        split = kf.split(train)
+        #  print(type(split))
+        for idx, (train_idx, valid_idx) in enumerate(split):
+            print('Index {}'.format(idx + 1))
+
+            y_cros_train, y_cros_valid = y_train.iloc[train_idx], y_test.iloc[valid_idx]
+            X_cros_train, X_cros_valid = X_train[train_idx,:],    X_test[valid_idx,:]
+
+            for epoch in tqdm(range(n_epochs)):
+
+                if epochs_without_improv >= early_stopping_epochs:
+                    break
+
+                model.train()
+                acc_train_loss = self.cross_train(X_cros_train, y_cros_train, model, optimizer, criterion, batch_size)
+                train_loss.append(acc_train_loss)
+
+                model.eval()
+                acc_valid_loss = self.cross_valid(X_cros_valid, y_cros_valid, model, criterion, batch_size)
+                valid_loss.append(acc_valid_loss)
+
+                if acc_valid_loss < best_valid_loss:
+                    torch.save(model.state_dict(), 'best_model') # save best model
+                    best_epoch = epoch
+                    best_valid_loss = acc_valid_loss
+                    best_train_loss = acc_train_loss
+                    epochs_without_improv = 0
+                else:
+                    epochs_without_improv += 1
+
+        # Load best model
+        model.load_state_dict(torch.load('best_model'))
+        model.eval()
+
+        # Print logs
+        if epochs_without_improv >= early_stopping_epochs:
+            print('Training interrupted by early stopping!')
+        else:
+            print('Training finished by epochs!')
+        print(f'Total epochs run: {epoch + 1}')
+        print(f'Best model found at epoch {best_epoch + 1} with valid loss {best_valid_loss} and training loss {best_train_loss}')
+
+        end = datetime.now()
+        print(f'Total training time: {end - init}')
+
+        return model, train_loss, valid_loss
+
