@@ -6,63 +6,61 @@ from Treinamento import Treinamento
 from Modelos import *
 from Plots import *
 
+from datetime import datetime
+
 class Classificador():
-    def __init__(self, model, epochs = 2000, batch_size = 25, early_stopping_epochs = 60, retries = 5, batches = []):
+    def __init__(self, dataset, model, epochs = 2000, batch_size = 25, early_stopping_epochs = 60):
+        self.dataset               = dataset
         self.model                 = model
         self.epochs                = epochs
-        self.early_stopping_epochs = early_stopping_epochs # quantas épocas sem melhoria serão toleradas antes de parar o treinamento
+        self.early_stopping_epochs = early_stopping_epochs
         self.batch_size            = batch_size
-        self.retries               = retries
-        self.batches               = batches
 
+    def classificacao(self, optimizer, criterion):
+        t = Treinamento(self.dataset, self.epochs, self.batch_size, self.early_stopping_epochs)
+        model, train_loss, valid_loss = t.train_linear(self.model, optimizer, criterion)
 
-    def classificacao(self, optimizer, criterion, X_train, y_train, X_valid, y_valid):
-        t = Treinamento()
-        model, train_loss, valid_loss = t.train(self.model,
-                                                self.epochs,
-                                                self.batch_size,
-                                                self.early_stopping_epochs,
-                                                optimizer,
-                                                criterion,
-                                                X_train,
-                                                y_train,
-                                                X_valid,
-                                                y_valid)
+        return model, train_loss, valid_loss, t.train, t.valid
 
-        return model, train_loss, valid_loss
+class Validacao_Cruzada():
+    def __init__(self, dataset, model, epochs = 2000, batch_size = 25, early_stopping_epochs = 60):
+        self.dataset               = dataset
+        self.model                 = model
+        self.epochs                = epochs
+        self.early_stopping_epochs = early_stopping_epochs
+        self.batch_size            = batch_size
+    
+    def classificacao(self, optimizer, criterion):
+        t = Treinamento(self.dataset, self.epochs, self.batch_size, self.early_stopping_epochs)
+        model, train_loss, valid_loss = t.train_cross_validation(self.model, optimizer, criterion)
 
+        return model, train_loss, valid_loss, t.train, t.valid
 
 class Regressor():
-    def __init__(self, epochs = 2000, batch_sizes = [], early_stopping_epochs = 60, retries = 5):
+    def __init__(self, dataset, epochs = 2000, batch_sizes = [], early_stopping_epochs = 60, retries = 5):
+        self.dataset               = dataset
         self.epochs                = epochs
-        self.early_stopping_epochs = early_stopping_epochs # quantas épocas sem melhoria serão toleradas antes de parar o treinamento
+        self.early_stopping_epochs = early_stopping_epochs
         self.batch_sizes           = batch_sizes
         self.retries               = retries
 
-    def regressao(self, input_features, layers, learning_rates, criterion, X_train, y_train, X_valid, y_valid):
+    def regressao(self, input_features, layers, learning_rates, criterion):
+        start = datetime.now()
         current_valid_loss = 0
-        t = Treinamento()
         best_valid_loss = np.Inf
         train_loss, valid_loss = [], []
+
         for initializations in range(0, self.retries):
-            for lr in learning_rates:
+            for learning_rate in learning_rates:
                 for batch_size in self.batch_sizes:
 
-                    print(f'----------\nLearning rate: {lr}\nBatch size: {batch_size}\n')
+                    print(f'----------\nLearning rate: {learning_rate}\nBatch size: {batch_size}\n')
 
                     model = GeradorRede(input_features, layers)
-                    optimizer = optim.SGD(model.parameters(), lr=lr)
+                    optimizer = optim.SGD(model.parameters(), lr=learning_rate)
 
-                    model, train_loss, valid_loss = t.train(model,
-                                                            self.epochs,
-                                                            batch_size,
-                                                            self.early_stopping_epochs,
-                                                            optimizer,
-                                                            criterion,
-                                                            X_train,
-                                                            y_train,
-                                                            X_valid,
-                                                            y_valid)
+                    t = Treinamento(self.dataset, self.epochs, batch_size, self.early_stopping_epochs)
+                    model, train_loss, valid_loss = t.train_linear(model, optimizer, criterion)
 
                     # store best valid loss
                     current_valid_loss = min(valid_loss)
@@ -72,6 +70,7 @@ class Regressor():
                         print('New best global model found!')
 
                     print(f'\nValidation loss: {current_valid_loss}\n')
-
-            return current_valid_loss, train_loss, valid_loss
+        
+        end = datetime.now()
+        print(f'\n\n\n--------------------\nTotal training time: {end - start}')
 
