@@ -66,5 +66,5 @@ class Plots():
     def get_loss(self, model, X_test, y_test, criterion):
         model.eval()
         predicted = model(X_test.float())
-        loss = criterion(predicted, y_test)
+        loss = criterion(predicted, y_test.float())
         return loss.item()

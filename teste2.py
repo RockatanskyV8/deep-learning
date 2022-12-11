@@ -18,7 +18,7 @@ class Regressor():
         self.batch_sizes           = batch_sizes
         self.retries               = retries
 
-    def regressao(self, input_features, layers, learning_rates, criterion):
+    def regressao(self, input_features, layers, learning_rates, criterion, best_global_model = None):
         start = datetime.now()
         current_valid_loss = 0
         best_valid_loss = np.Inf
@@ -31,6 +31,11 @@ class Regressor():
                     print(f'----------\nLearning rate: {learning_rate}\nBatch size: {batch_size}\n')
 
                     model = GeradorRede(input_features, layers)
+
+                    if (best_global_model is not None):
+                        model.load_state_dict(torch.load(best_global_model))
+                        model.eval()
+
                     optimizer = optim.SGD(model.parameters(), lr=learning_rate)
 
                     t = Treinamento(self.dataset, self.epochs, batch_size, self.early_stopping_epochs)
@@ -49,16 +54,6 @@ class Regressor():
         print(f'\n\n\n--------------------\nTotal training time: {end - start}')
 
 ################################################################################################
-
-def plots(model, train_loss, valid_loss, X_test, y_test):
-  print(model)
-  p = Plots()
-  p.plot_losses(train_loss, valid_loss)
-
-  accuracy_final = p.get_accuracy(model, X_test, y_test)
-  print("\n############ Acurácia ############")
-  print(accuracy_final)
-  print("############ -------- ############")
 
 def run_models(dataset, criterion, layers, 
                run_epochs = 2000, run_early_stopping_epochs = 60, 
@@ -97,11 +92,29 @@ camadas.append(Camada(output_size, nn.Softmax(dim=-1) ))
 criterion = nn.CrossEntropyLoss()
 
 current_valid_loss = run_models(df, criterion, camadas,
-                                run_epochs = 2000, 
-                                run_early_stopping_epochs = 75, 
-                                input_features = 3,  
-                                learning_rates = [0.0001, 0.001, 0.01, 0.1],  
+                                run_epochs = 2000,
+                                run_early_stopping_epochs = 75,
+                                input_features = 3,
+                                learning_rates = [0.0001, 0.001],
                                 run_retries = 5,
-                                run_batch_sizes = [15, 30, 60, 120])
+                                run_batch_sizes = [15, 30])
 
+model = GeradorRede(input_features, camadas)
+model.load_state_dict(torch.load('best_global_model'))
+model.eval()
+
+t = Treinamento(df, 2000, 10, 35)
+X_valid, X_test, y_valid, y_test = t.valid
+
+p = Plots()
+acc = p.get_accuracy(model, 
+                     torch.from_numpy(X_test), 
+                     torch.from_numpy(y_test.to_numpy()))
+print(acc)
+
+lss = p.get_loss(model, 
+                 torch.from_numpy(X_test), 
+                 torch.from_numpy(y_test.to_numpy()), 
+                 criterion)
+print(lss)
 
