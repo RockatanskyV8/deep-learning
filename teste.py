@@ -9,11 +9,28 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
-from Runner import Classificador
+from Treinamento import Treinamento
 from Modelos import *
 from Plots import *
 
 ################################################################################################
+
+class Classificador():
+    def __init__(self, dataset, model, epochs = 2000, batch_size = 25, early_stopping_epochs = 60):
+        self.dataset               = dataset
+        self.model                 = model
+        self.epochs                = epochs
+        self.early_stopping_epochs = early_stopping_epochs
+        self.batch_size            = batch_size
+
+    def classificacao(self, optimizer, criterion):
+        t = Treinamento(self.dataset, self.epochs, self.batch_size, self.early_stopping_epochs)
+        model, train_loss, valid_loss = t.train_linear(self.model, optimizer, criterion)
+
+        return model, train_loss, valid_loss, t.train, t.valid
+
+################################################################################################
+
 df = pd.read_csv('../df_points.txt', sep='\t', index_col=[0])
 
 input_features = 3
