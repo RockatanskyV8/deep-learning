@@ -23,9 +23,9 @@ class Treinamento():
 
         transformations = transforms.Compose([ transforms.ToTensor() ])
 
-        self.train_set = CustomDataset(self.X_train, self.y_train)
-        self.valid_set = CustomDataset(self.X_valid, self.y_valid)
-        self.test_set  = CustomDataset(self.X_test,  self.y_test)
+        self.train_set = CustomDataset(self.X_train, self.y_train.to_numpy())
+        self.valid_set = CustomDataset(self.X_valid, self.y_valid.to_numpy())
+        self.test_set  = CustomDataset(self.X_test,  self.y_test.to_numpy())
 
         self.n_epochs              = n_epochs
         self.batch_size            = batch_size           
