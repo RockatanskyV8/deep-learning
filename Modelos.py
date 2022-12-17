@@ -3,7 +3,7 @@ import torch.nn.functional as F
 from torch.nn.modules import Module
 
 class Camada():
-    def __init__(self, size, activation, dropout = None):
+    def __init__(self, size, activation = None, dropout = None):
         self.size = size
         self.activation = activation
         self.dropout = dropout
