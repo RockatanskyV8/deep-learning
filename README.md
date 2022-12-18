@@ -18,6 +18,6 @@
 
 ### Notebooks:
 * [Notebook de Classificação](https://colab.research.google.com/drive/1JvqY4rVoe326ZYBHM90SHk3Km3kVIu-H?usp=sharing) 
-* [Notebook de Classificação](https://colab.research.google.com/drive/128a011xENsVt4ezK8BCBzJSrx9u66hMl?usp=sharing)
+* [Notebook de Regressão](https://colab.research.google.com/drive/128a011xENsVt4ezK8BCBzJSrx9u66hMl?usp=sharing)
 * [Notebook de Validação Cruzada](https://colab.research.google.com/drive/136e6M59CTLIIdm5a_VIW5HWdIC2sUUzV?usp=sharing)
 * [Tentando com outras camadas dinamicamente criadas](https://colab.research.google.com/drive/1Aa64Xgbp7JQHjAghpOfFESExh7gf_Sii?usp=sharing)
